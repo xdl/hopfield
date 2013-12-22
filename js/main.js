@@ -125,9 +125,16 @@ var HopfieldView = BaseView.extend({
 		for (var i = 0; i < cells.length; i++) {
 			if(recall_pattern[i] != pattern[i]) {
 				if (recall_pattern[i] == 1) {
-					cells[i].css('background-color', 'grey');
+					//cells[i].css('background-color', 'grey');
+					//lololol
+					cells[i].animate({
+						backgroundColor: 'gray'
+					}, 'fast');
 				} else {
-					cells[i].css('background-color', 'white');
+					//cells[i].css('background-color', 'white');
+					cells[i].animate({
+						backgroundColor: 'white'
+					}, 'fast');
 				}
 			}
 		}
