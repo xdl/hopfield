@@ -50,6 +50,8 @@ Grid.prototype.appendTo = function(container) {
 	});
 }
 
+//eddieli188@hotmail.com
+
 // puts a pattern on the grid
 Grid.prototype.blit = function(pattern) {
 
@@ -65,8 +67,8 @@ Grid.prototype.blit = function(pattern) {
 	var len = pattern.length;
 
 	for (var i = 0; i < len; i++) {
-		this._internal_store[i] = Number(pattern[i]);
-		if (Number(pattern[i])) {
+		this._internal_store[i] = pattern[i];
+		if (pattern[i] == 1) {
 			this._cells[i].css('background-color', 'grey');
 		}
 	}

@@ -32,7 +32,7 @@ Matrix.prototype.unrollToJSArray = function() {
 function HopfieldNetwork(size) {
 	this.size = size;
 	this._weight = Matrix.Zero(size, size);
-	console.log('hp network of size', size,'created!');
+	//console.log('hp network of size', size,'created!');
 }
 
 // debugging purposes:
@@ -44,16 +44,26 @@ HopfieldNetwork.prototype.getSize = function() {
 	return this.size;
 }
 
+
+HopfieldNetwork.prototype.contributionMatrix = function(pattern) {
+	var _pattern = Matrix.create(pattern);
+	var _contribution = _pattern.x(_pattern.transpose());
+	var _identity = Matrix.I(this.size);
+	_contribution = _contribution.subtract(_identity);
+	return _contribution;
+}
+
+HopfieldNetwork.prototype.forget = function(pattern) {
+	var _contrib = this.contributionMatrix(pattern);
+	this._weight = this._weight.subtract(_contrib);
+}
+
 HopfieldNetwork.prototype.train = function(pattern) {
-	var _contrib = constructContributionMatrix(pattern);
+	//contribution matrix
+	var _contrib = this.contributionMatrix(pattern);
+	//applying contribution matrix
 	this._weight = this._weight.add(_contrib);
 
-	function constructContributionMatrix(pattern) {
-		var _pattern = Matrix.create(pattern);
-		var _contrib = _pattern.x(_pattern.transpose());
-		_contrib = _contrib.subtract(Matrix.I(4));
-		return _contrib;
-	}
 }
 
 HopfieldNetwork.prototype.present = function(input) {
@@ -81,7 +91,7 @@ var hp = new HopfieldNetwork(4);
 
 hp.train([-1,1,-1,1])
 c = hp.present([-1,1,-1,1])
-d = hp.present([0,0,0,1]) // good! returning fine.
+d = hp.present([-1,-1,-1,1]) // good! returning fine.
 
-console.log('c:', c);
-console.log('d:', d);
+//console.log('c:', c);
+//console.log('d:', d);
