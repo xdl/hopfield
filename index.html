@@ -12,7 +12,7 @@
 		<div id='stored'>
 		</div>
 
-		<div id='patterns'>
+		<div id='examples'>
 		</div>
 
 		<script type='text/template' id='hopfield_tmpl'>
@@ -21,38 +21,47 @@
 				<button id='invert'>Invert</button>
 				<div id='grid_holder'>
 				</div>
+				<p>
+					Energy: <span class='energy'>0</span>
+				</p>
 				<button id='train'>Train</button>
 				<button id='recall'>Recall</button>
 			</div>
 		</script>
 
 		<script type="text/template" id='stored_tmpl'>
-			<button id='showhide'>Show/hide memories</button>
 			<div id="memories">
-				<h3>Stored patterns</h3>
+				<h3>Memories</h3>
 				<div class="xscroller">
 				</div>
 			</div>
 		</script>
 
-		<script type="text/template" id='patterns_tmpl'>
-			<h3>Pattern examples</h3>
+		<script type="text/template" id='examples_tmpl'>
+			<h3>Examples</h3>
 			<div class="xscroller">
+
+			</div>
+		</script>
+
+		<script type="text/template" id='examples_tmpl'>
+			<h3>Examples</h3>
+			<div class="xscroller">
+
 			</div>
 		</script>
 
 		<script type="text/template" id='mem_tmpl'>
 			<div class = "mem">
 				<div class="grid_holder"></div>
+				<p>
+					Energy: <span class='energy'>0</span>
+				</p>
 				<button class='forget'>Forget</button>
 			</div>
 			</div>
 
 		</script>
-
-		<script type="text/template" id='example_tmpl'>
-		</script>
-
 
 		<script src="libs/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="libs/underscore-min.js" type="text/javascript" charset="utf-8"></script>

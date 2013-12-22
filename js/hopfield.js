@@ -30,9 +30,12 @@ Matrix.prototype.unrollToJSArray = function() {
 //convention: use an underscore to denote a sylvester matrix variable.
 
 function HopfieldNetwork(size) {
+	//number of nodes
 	this.size = size;
+	//weight matrix
 	this._weight = Matrix.Zero(size, size);
-	//console.log('hp network of size', size,'created!');
+	//number of patterns stored
+	this.N = 0;
 }
 
 // debugging purposes:
@@ -53,17 +56,25 @@ HopfieldNetwork.prototype.contributionMatrix = function(pattern) {
 	return _contribution;
 }
 
-HopfieldNetwork.prototype.forget = function(pattern) {
-	var _contrib = this.contributionMatrix(pattern);
-	this._weight = this._weight.subtract(_contrib);
-}
-
 HopfieldNetwork.prototype.train = function(pattern) {
 	//contribution matrix
 	var _contrib = this.contributionMatrix(pattern);
 	//applying contribution matrix
 	this._weight = this._weight.add(_contrib);
+	this.N++;
+}
 
+HopfieldNetwork.prototype.forget = function(pattern) {
+	var _contrib = this.contributionMatrix(pattern);
+	this._weight = this._weight.subtract(_contrib);
+	this.N--;
+}
+
+HopfieldNetwork.prototype.getEnergy = function(pattern) {
+	var _pattern = Matrix.create(pattern);
+	var _W_p = this._weight.x(_pattern);
+	var energy = _pattern.transpose().x(_W_p);
+	return -(0.5*energy.elements[0])/this.N;
 }
 
 HopfieldNetwork.prototype.present = function(input) {
@@ -90,8 +101,14 @@ HopfieldNetwork.prototype.present = function(input) {
 var hp = new HopfieldNetwork(4);
 
 hp.train([-1,1,-1,1])
+console.log('hp.getMatrix():', hp.getMatrix());
 c = hp.present([-1,1,-1,1])
 d = hp.present([-1,-1,-1,1]) // good! returning fine.
+
+var e = hp.getEnergy([-1,1,-1,1]);
+
+console.log('e:', e);
+
 
 //console.log('c:', c);
 //console.log('d:', d);

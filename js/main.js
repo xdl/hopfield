@@ -1,18 +1,36 @@
-WIDTH = 4;
-HEIGHT = 4;
+WIDTH = 5;
+HEIGHT = 6;
 
 $(function() {
 	var hp = new HopfieldView();
 	hp.render();
 	var stored = new StoredView();
 	stored.render();
-	var patterns = new PatternsView();
-	patterns.render();
+	//var examples = new ExamplesView();
+	//examples.render();
 });
+
+
+//some global objects
+Global = {};
+Global.mouseDown = 0;
+//prevents unecessary energy calculations
+Global.energyUpdateRequired = false;
+//required for updating the energies of the memories
+//Global.hopfield; <-- created when a HopfieldView is instantiated
+Global.formatNumber = function(num) {
+	//is it an int?
+	if (num%1 === 0) {
+		return num;
+	}
+	//otherwise, truncate to 2dp
+	else {
+		return num.toFixed(2);
+	}
+}
 
 var BaseView = Backbone.View.extend({
 });
-
 
 var HopfieldView = BaseView.extend({
 	el: $('#network'),
@@ -21,17 +39,23 @@ var HopfieldView = BaseView.extend({
 		this.grid = new Grid(WIDTH, HEIGHT);
 		this.hopfield = new HopfieldNetwork(WIDTH*HEIGHT);
 
+		//other memories (patterns) need access to this to calculate their energies.
+		Global.hopfield = this.hopfield;
+
 		//for drawing purposes
-		mouseDown = 0;
+		Global.mouseDown = 0;
 		document.body.onmousedown = function() { 
-			  ++mouseDown;
+			  ++Global.mouseDown;
 		}
 		document.body.onmouseup = function() {
-			  mouseDown = 0;
+			  Global.mouseDown = 0;
 		}
 
-		//listen out for any pattern forgets:
+		//listen out for any pattern forgets so that the weight matrix is updated:
 		Backbone.on('forget', this.forget, this);
+
+		//on store, the energy calculation also needs to be updated.
+		Backbone.on('store', this.updateHPEnergy, this);
 	},
 	events: {
 		'mousedown .grid': 'togglefill',
@@ -39,19 +63,33 @@ var HopfieldView = BaseView.extend({
 		'click #clear': 'clear',
 		'click #train': 'train',
 		'click #recall': 'recall',
-		'click #invert': 'invert'
+		'click #invert': 'invert',
+		'mouseup .grid': 'handleUp',
+		'mouseleave .grid': 'handleLeave'
 	},
-	invert: function() {
-		var cells = this.grid._cells;
-		for (var i = 0; i < cells.length; i++) {
-			if (cells[i].css('background-color') == 'rgb(255, 255, 255)') {
-				cells[i].css('background-color', 'grey');
-			} else {
-				cells[i].css('background-color', 'white');
-			}
+	//currently, these two are doing pretty much the same thing. Will decided whether to squash them into one later.
+	handleLeave: function() {
+		if (Global.energyUpdateRequired) {
+			this.updateHPEnergy();
+			Global.energyUpdateRequired = false;
 		}
 	},
-	recall: function() {
+	handleUp: function() {
+		if (Global.energyUpdateRequired) {
+			this.updateHPEnergy();
+			Global.energyUpdateRequired = false;
+		}
+	},
+	updateHPEnergy: function() {
+			var pattern = this.getPattern();
+			var e = this.hopfield.getEnergy(pattern);
+			//precaution if nothing has been trained yet.
+			if(isNaN(e)) {
+				e = 0;
+			}
+			this.$el.find('.energy').html(Global.formatNumber(e));
+	},
+	getPattern: function() {
 		//get the pattern currently drawn:
 		var cells = this.grid._cells;
 		var pattern = [];
@@ -62,9 +100,28 @@ var HopfieldView = BaseView.extend({
 				pattern.push(1);
 			}
 		}
+		return pattern;
+	},
+	invert: function() {
+		var cells = this.grid._cells;
+		for (var i = 0; i < cells.length; i++) {
+			if (cells[i].css('background-color') == 'rgb(255, 255, 255)') {
+				cells[i].css('background-color', 'grey');
+			} else {
+				cells[i].css('background-color', 'white');
+			}
+		}
+
+
+		//actually, imma comment this out. We all know that it doesn't change the energy.
+		//this.updateHPEnergy();
+	},
+	recall: function() {
+		var pattern = this.getPattern();
 		var recall_pattern = this.hopfield.present(pattern);
 
 		//updates the cells
+		var cells = this.grid._cells;
 		for (var i = 0; i < cells.length; i++) {
 			if(recall_pattern[i] != pattern[i]) {
 				if (recall_pattern[i] == 1) {
@@ -74,9 +131,12 @@ var HopfieldView = BaseView.extend({
 				}
 			}
 		}
+
+		this.updateHPEnergy();
 	},
 	forget: function(pattern) {
 		this.hopfield.forget(pattern);
+		this.updateHPEnergy();
 	},
 	train: function() {
 		var sequence = [];
@@ -97,7 +157,6 @@ var HopfieldView = BaseView.extend({
 		//don't train for empty pattern:
 		if (allow_train) {
 			this.hopfield.train(sequence);
-			//this.hopfield.train.call(this.hopfield, sequence);
 			//create a new memory grid:
 			Backbone.trigger('store', sequence);
 		}
@@ -110,8 +169,9 @@ var HopfieldView = BaseView.extend({
 		for (var i = 0; i < cells.length; i++) {
 			cells[i].css('background-color', 'white');
 		}
+		this.updateHPEnergy();
 	},
-	togglefill: function(e) {
+	toggle: function(e) {
 		if (e.target.tagName !='TD') {
 			return;
 		}
@@ -124,22 +184,14 @@ var HopfieldView = BaseView.extend({
 			cell.css('background-color', 'white');
 		}
 
-		//console.log(cell.css('background-color'));
-
+		Global.energyUpdateRequired = true;
+	},
+	togglefill: function(e) {
+		this.toggle(e);
 	},
 	toggledraw: function(e) {
-		if (e.target.tagName !='TD') {
-			return;
-		}
-		var cell = $(e.target);
-		var color = cell.css('background-color');
-		
-		if (mouseDown) {
-			if (color == 'rgb(255, 255, 255)') {
-				cell.css('background-color', 'grey');
-			} else {
-				cell.css('background-color', 'white');
-			}
+		if (Global.mouseDown) {
+			this.toggle(e);
 		}
 	},
 	
@@ -160,16 +212,6 @@ var StoredView = BaseView.extend({
 		Backbone.on('store', this.store, this);
 		this.grids = [];
 	},
-	events: {
-		'click #showhide': 'toggleMemories'
-	},
-	toggleMemories: function() {
-		if ($('#memories').is(":hidden")) {
-			$('#memories').slideDown('fast');
-		} else {
-			$('#memories').slideUp('fast');
-		}
-	},
 	render: function() {
 		this.$el.html(this.template);
 		//hide by default
@@ -184,6 +226,12 @@ var StoredView = BaseView.extend({
 			'pattern':sequence, 
 			'container': this.container
 		}));
+
+		//recalculate energies
+		
+		for (var i = 0; i < this.grids.length; i++) {
+			this.grids[i].updateHPEnergy();
+		}
 	}
 });
 
@@ -201,8 +249,11 @@ var GridView = BaseView.extend({
 	events: {
 		'click button.forget': 'forget'
 	},
+	updateHPEnergy: function() {
+		var e = Global.hopfield.getEnergy(this.pattern);
+		this.$el.find('.energy').html(Global.formatNumber(e));
+	},
 	forget: function() { //removes from the list.
-		console.log('forgetting');
 		this.$el.remove();
 		//removes it from hopfield
 		Backbone.trigger('forget', this.pattern);
@@ -215,13 +266,14 @@ var GridView = BaseView.extend({
 		this.el = this.$el[0];
 
 		this.grid.appendTo(this.$el.find('.grid_holder'));
+
 		this.grid.blit(this.pattern);
 	}
 });
 
-var PatternsView = BaseView.extend({
-	el: $('#patterns'),
-	template: _.template($('#patterns_tmpl').html()),
+var ExamplesView = BaseView.extend({
+	el: $('#examples'),
+	template: _.template($('#examples_tmpl').html()),
 	initialize: function() {
 	},
 	render:function() {
