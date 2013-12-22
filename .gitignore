@@ -1,0 +1,5 @@
+node_modules/
+scratch/
+*.swp
+#not using node anymore
+package.json 
