@@ -1,5 +1,5 @@
 WIDTH = 5;
-HEIGHT = 6;
+HEIGHT = 5;
 
 $(function() {
 	var hp = new HopfieldView();
