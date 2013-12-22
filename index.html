@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<title>Hopfield network</title>
+		<link href='style.css' rel='stylesheet' type='text/css'>
+	</head>
+	<body>
+		<h1>Hopfield network</h1>
+		<div id='network'>
+		</div>
+
+		<div id='stored'>
+		</div>
+
+		<div id='patterns'>
+		</div>
+
+		<script type='text/template' id='hopfield_tmpl'>
+			<div class='main'>
+				<div id='grid_holder'>
+				</div>
+				<button id='train'>Train</button>
+				<button id='recall'>Recall</button>
+				<button id='reset'>Reset</button>
+			</div>
+		</script>
+
+		<script type="text/template" id='stored_tmpl'>
+			<button id='showhide'>Show/hide memories</button>
+			<div id="memories">
+				<h3>Stored patterns</h3>
+				<div class="xscroller">
+				</div>
+			</div>
+		</script>
+
+		<script type="text/template" id='patterns_tmpl'>
+			<h3>Pattern examples</h3>
+			<div class="xscroller">
+			</div>
+		</script>
+
+
+		<script src="libs/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="libs/underscore-min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="libs/backbone-min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="libs/sylvester.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/grid.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/hopfield.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/main.js" type="text/javascript" charset="utf-8"></script>
+
+	</body>
+</html>
+
+

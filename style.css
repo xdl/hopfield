@@ -1,0 +1,44 @@
+.grid {
+	display: inline-block;
+	margin: 2px
+}
+
+.main {
+	margin: 0 auto;
+	display:block;
+	text-align:center;
+}
+
+
+.xscroller {
+	padding: 1px;
+	overflow-x: auto;
+	overflow-y: none;
+	height: 120px;
+	white-space: nowrap;
+}
+
+table {
+	border-collapse:collapse;
+	cursor:pointer;
+	-webkit-touch-callout: none;/*for mobile*/
+	-webkit-user-select: none;/*for chrome*/
+	-khtml-user-select: none;/*for safari*/
+	-moz-user-select: none;/*for Mozilla*/
+	-ms-user-select: none;/*for mircosoft*/
+	-o-user-select: none;/*for opera*/
+	user-select: none;/*base css ,but not work in all browsers*/
+}
+td,tr {
+	-webkit-touch-callout: none;/*for mobile*/
+	-webkit-user-select: none;/*for chrome*/
+	-khtml-user-select: none;/*for safari*/
+	-moz-user-select: none;/*for Mozilla*/
+	-ms-user-select: none;/*for mircosoft*/
+	-o-user-select: none;/*for opera*/
+	user-select: none;/*base css ,but not work in all browsers*/
+	border: 1px solid;
+	width:15px;
+	height:15px;
+	background-color: white;
+}
