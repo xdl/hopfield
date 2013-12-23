@@ -1,18 +1,16 @@
-WIDTH = 5;
-HEIGHT = 5;
 
 $(function() {
 	var hp = new HopfieldView();
 	hp.render();
 	var stored = new StoredView();
 	stored.render();
-	//var examples = new ExamplesView();
-	//examples.render();
 });
 
 
 //some global objects
 Global = {};
+Global.WIDTH = 5; //default dimensions
+Global.HEIGHT = 5;
 Global.mouseDown = 0;
 //prevents unecessary energy calculations
 Global.energyUpdateRequired = false;
@@ -30,14 +28,23 @@ Global.formatNumber = function(num) {
 }
 
 var BaseView = Backbone.View.extend({
+	close: function() {
+		this.stopListening();
+		this.unbind();
+
+		if (this.destroy) {
+			//expliciting unbinding from the global bus.
+			this.destroy();
+		}
+	}
 });
 
 var HopfieldView = BaseView.extend({
 	el: $('#network'),
 	template: _.template($('#hopfield_tmpl').html()),
 	initialize: function() {
-		this.grid = new Grid(WIDTH, HEIGHT);
-		this.hopfield = new HopfieldNetwork(WIDTH*HEIGHT);
+		this.grid = new Grid(Global.WIDTH, Global.HEIGHT);
+		this.hopfield = new HopfieldNetwork(Global.WIDTH*Global.HEIGHT);
 
 		//other memories (patterns) need access to this to calculate their energies.
 		Global.hopfield = this.hopfield;
@@ -66,9 +73,29 @@ var HopfieldView = BaseView.extend({
 		'click #recall': 'recall',
 		'click #invert': 'invert',
 		'mouseup .grid': 'handleUp',
-		'mouseleave .grid': 'handleLeave'
+		'mouseleave .grid': 'handleLeave',
+		'change input#cellwidth': 'changeDim',
+		'change input#cellheight': 'changeDim'
 	},
 	//currently, these two are doing pretty much the same thing. Will decided whether to squash them into one later.
+	changeDim: function() {
+		var w = this.$el.find('#cellwidth').val();
+		var h = this.$el.find('#cellheight').val();
+		//validation before resetting.
+		if (w%1 === 0 && w >= 1 && h%1 === 0 && h >= 1) {
+			Global.WIDTH = w;
+			Global.HEIGHT = h;
+			this.grid.remove();
+			this.grid = new Grid(w, h);
+			this.hopfield = new HopfieldNetwork(w*h);
+			Global.hopfield = this.hopfield;
+			this.grid.appendTo(this.$el.find('#grid_holder'));
+
+			//need to remove all the memories as well:
+			Backbone.trigger('mindwipe');
+			this.$el.find('.energy').html(0);
+		}
+	},
 	handleLeave: function() {
 		if (Global.energyUpdateRequired) {
 			this.updateHPEnergy();
@@ -197,7 +224,6 @@ var HopfieldView = BaseView.extend({
 					backgroundColor: 'white'
 				}, 'fast');
 			} else {
-				console.log('color:', color);
 			}
 		}
 		this.updateHPEnergyWithPattern(pattern);
@@ -249,7 +275,11 @@ var StoredView = BaseView.extend({
 	initialize:function() {
 		// listen for whenever we store a pattern from hopfield
 		Backbone.on('store', this.store, this);
+		Backbone.on('mindwipe', this.forgetAll, this);
 		this.grids = [];
+	},
+	events: {
+		'click button.forget': 'handleForget'
 	},
 	render: function() {
 		this.$el.html(this.template);
@@ -258,6 +288,27 @@ var StoredView = BaseView.extend({
 
 		//caches the container:
 		this.container = this.$el.find('.xscroller');
+		//caches the number:
+		this.count = this.$el.find('#num');
+	},
+	handleForget: function(e) {
+		var forgets = this.$el.find('.forget');
+		var index = forgets.index(e.target);
+		var gridview = this.grids[index];
+		var pattern = gridview.pattern;
+		gridview.remove();
+		gridview.close();
+		this.grids.splice(index,1);
+		this.count.html(this.grids.length);
+		Backbone.trigger('forget', pattern);
+	},
+	forgetAll: function(e) {
+		while (this.grids.length > 0) {
+			this.grids[0].remove();
+			this.grids[0].close();
+			this.grids.shift();
+		}
+		this.count.html(0);
 	},
 	store: function(sequence) {
 		// stores and updates it.
@@ -265,6 +316,8 @@ var StoredView = BaseView.extend({
 			'pattern':sequence, 
 			'container': this.container
 		}));
+
+		this.count.html(this.grids.length);
 
 		//recalculate energies
 		
@@ -282,22 +335,18 @@ var GridView = BaseView.extend({
 		this.pattern = options.pattern;
 		this.container =options.container;
 
-		this.grid = new Grid(WIDTH, HEIGHT);
+		this.grid = new Grid(Global.WIDTH, Global.HEIGHT);
+		//for plucking later.
+		this.grid_id = this.grid._id;
 		this.render();
 		Backbone.on('forget', this.updateHPEnergy, this);
-	},
-
-	events: {
-		'click button.forget': 'forget'
 	},
 	updateHPEnergy: function() {
 		var e = Global.hopfield.getEnergy(this.pattern);
 		this.$el.find('.energy').html(Global.formatNumber(e));
 	},
-	forget: function() { //removes from the list.
-		this.$el.remove();
-		//removes it from hopfield
-		Backbone.trigger('forget', this.pattern);
+	destroy: function() {
+		Backbone.off('forget', this.updateHPEnergy, this);
 	},
 	render: function() {
 		this.container.append(this.template);
@@ -312,12 +361,3 @@ var GridView = BaseView.extend({
 	}
 });
 
-var ExamplesView = BaseView.extend({
-	el: $('#examples'),
-	template: _.template($('#examples_tmpl').html()),
-	initialize: function() {
-	},
-	render:function() {
-		this.$el.html(this.template);
-	}
-});

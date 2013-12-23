@@ -24,7 +24,7 @@
 			<ul>
 				<li>Storing the same pattern more than once will lower that pattern's energy.</li>
 				<li>Too many similar patterns being stored may result in some superposition of the patterns being retrieved (a 'mixture state').</li>
-				<li>Oscillatory behaviour can be observed.</li>
+				<li>Unstable states that switch between each other can be observed.</li>
 				<li>The 'inverse' pattern has the same energy as the real pattern.</li>
 			</ul>
 		</div>
@@ -47,40 +47,25 @@
 				</p>
 				<div id='grid_holder'>
 				</div>
-				<button title='clear current pattern' id='clear'>Clear</button>
+				<button title='clear the displayed pattern' id='clear'>Clear</button>
 				<button title='generate a random pattern' id='random'>Random</button>
-				<button title='invert the pattern' id='invert'>Invert</button>
+				<button title='invert the displayed pattern' id='invert'>Invert</button>
 				<br/>
-				<button title='train the network with this pattern' id='train'>Train</button>
-				<button title='present this pattern to the network to recall' id='recall'>Recall</button>
+				<button title='train the network with the displayed pattern' id='train'>Train</button>
+				<button title='present the displayed pattern to the network to recall' id='recall'>Recall</button>
 				<br/>
 				Width: 
-				<input type='number' min='1' value='5'>
-				<br/>
+				<input id='cellwidth' type='number' min='1' value='5'>
 				Height: 
-				<input type='number' min='1' value='5'>
+				<input id='cellheight' type='number' min='1' value='5'>
 			</div>
 		</script>
 
 		<script type="text/template" id='stored_tmpl'>
 			<div id="memories">
-				<h3>Stored patterns</h3>
+				<h3><span class='ul'>Stored patterns</span> (<span id='num'>0</span>)</h3>
 				<div class="xscroller">
 				</div>
-			</div>
-		</script>
-
-		<script type="text/template" id='examples_tmpl'>
-			<h3>Examples</h3>
-			<div class="xscroller">
-
-			</div>
-		</script>
-
-		<script type="text/template" id='examples_tmpl'>
-			<h3>Examples</h3>
-			<div class="xscroller">
-
 			</div>
 		</script>
 

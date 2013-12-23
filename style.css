@@ -6,14 +6,9 @@ body {
 	font-family: Arial;
 }
 
-h2, h3 {
-
-	/*font-family: Verdana;*/
+h2 {
 	font-family: Arial;
 	text-decoration:underline;
-	/*font-family: "Georgia";*/
-	/*font-family: Georgia;*/
-	/*font-family: Arial Black;*/
 }
 
 .mem {
@@ -22,17 +17,25 @@ h2, h3 {
 	text-align:center;
 }
 
+#num {
+	text-decoration:none;
+}
+
 .main {
 	margin: 0 auto;
 	display:block;
 	text-align:center;
 }
 
+input {
+	width: 35px;
+}
+
 .xscroller {
 	padding: 1px;
 	overflow-x: auto;
 	overflow-y: none;
-	height: 220px;
+	/*height: 220px;*/
 	white-space: nowrap;
 }
 

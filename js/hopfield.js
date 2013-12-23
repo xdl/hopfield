@@ -101,14 +101,7 @@ HopfieldNetwork.prototype.present = function(input) {
 var hp = new HopfieldNetwork(4);
 
 hp.train([-1,1,-1,1])
-console.log('hp.getMatrix():', hp.getMatrix());
 c = hp.present([-1,1,-1,1])
 d = hp.present([-1,-1,-1,1]) // good! returning fine.
 
 var e = hp.getEnergy([-1,1,-1,1]);
-
-console.log('e:', e);
-
-
-//console.log('c:', c);
-//console.log('d:', d);

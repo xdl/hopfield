@@ -18,8 +18,6 @@ function Grid(width, height) {
 	var _this = this;
 
 	this._html = getGridHTML(width, height);
-
-	console.log('new grid created!');
  
 	function getGridHTML(width, height) {
 
