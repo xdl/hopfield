@@ -6,6 +6,16 @@ body {
 	font-family: Arial;
 }
 
+h2, h3 {
+
+	/*font-family: Verdana;*/
+	font-family: Arial;
+	text-decoration:underline;
+	/*font-family: "Georgia";*/
+	/*font-family: Georgia;*/
+	/*font-family: Arial Black;*/
+}
+
 .mem {
 	display: inline-block;
 	margin: 2px;

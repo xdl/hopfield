@@ -61,6 +61,7 @@ var HopfieldView = BaseView.extend({
 		'mousedown .grid': 'togglefill',
 		'mouseover .grid': 'toggledraw',
 		'click #clear': 'clear',
+		'click #random': 'random',
 		'click #train': 'train',
 		'click #recall': 'recall',
 		'click #invert': 'invert',
@@ -81,13 +82,22 @@ var HopfieldView = BaseView.extend({
 		}
 	},
 	updateHPEnergy: function() {
-			var pattern = this.getPattern();
-			var e = this.hopfield.getEnergy(pattern);
-			//precaution if nothing has been trained yet.
-			if(isNaN(e)) {
-				e = 0;
-			}
-			this.$el.find('.energy').html(Global.formatNumber(e));
+		var pattern = this.getPattern();
+		var e = this.hopfield.getEnergy(pattern);
+		//precaution if nothing has been trained yet.
+		if(isNaN(e)) {
+			e = 0;
+		}
+		this.$el.find('.energy').html(Global.formatNumber(e));
+	},
+	//if you're still waiting for the transition to finish :/
+	updateHPEnergyWithPattern: function(recall_pattern) {
+		var e = this.hopfield.getEnergy(recall_pattern);
+		//precaution if nothing has been trained yet.
+		if(isNaN(e)) {
+			e = 0;
+		}
+		this.$el.find('.energy').html(Global.formatNumber(e));
 	},
 	getPattern: function() {
 		//get the pattern currently drawn:
@@ -139,7 +149,7 @@ var HopfieldView = BaseView.extend({
 			}
 		}
 
-		this.updateHPEnergy();
+		this.updateHPEnergyWithPattern(recall_pattern);
 	},
 	forget: function(pattern) {
 		this.hopfield.forget(pattern);
@@ -169,6 +179,28 @@ var HopfieldView = BaseView.extend({
 		}
 
 
+	},
+	random: function() {
+		var cells = this.grid._cells;
+		var pattern = [];
+		for (var i = 0; i < cells.length; i++) {
+			var value = Math.random() <= 0.5 ? -1 : 1;
+			pattern.push(value);
+			var color = cells[i].css('background-color');
+			if (color == 'rgb(255, 255, 255)' && value == 1) {
+				cells[i].animate({
+					backgroundColor: 'gray'
+				}, 'fast');
+			}
+			else if (color == 'rgb(128, 128, 128)' && value == -1) {
+				cells[i].animate({
+					backgroundColor: 'white'
+				}, 'fast');
+			} else {
+				console.log('color:', color);
+			}
+		}
+		this.updateHPEnergyWithPattern(pattern);
 	},
 	clear: function() {
 		// reset the grid:
@@ -252,7 +284,9 @@ var GridView = BaseView.extend({
 
 		this.grid = new Grid(WIDTH, HEIGHT);
 		this.render();
+		Backbone.on('forget', this.updateHPEnergy, this);
 	},
+
 	events: {
 		'click button.forget': 'forget'
 	},

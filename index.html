@@ -15,20 +15,21 @@
 		<p>A <a href='http://en.wikipedia.org/wiki/Hopfield_network'>Hopfield network</a> is a type of <a href='http://en.wikipedia.org/wiki/Artificial_neural_network'>neural network</a> that can be used to store patterns. This Hopfield network is implemented as follows: </p>
 		<ul>
 			<li>Each cell in the grids below corresponds to a node. Each cell is either grey ($c_i = 1$) or white ($c_i = -1$).</li>
-			<li>The weight matrix is defined as $ w_{ij} = \frac{1}{N} \sum_{k=1}^{N} x^{(k)}_{i} x^{(k)}_j$ where $x$ is a stored pattern and $N$ is the total number of stored patterns. It is symmetric ($w_{ij} = w_{ji}$) and there are no self connections ($w_{ii} = 0$).</li>
+			<li>The weight matrix is defined as $ w_{ij} = \frac{1}{N} \sum_{k=1}^{N} x^{(k)}_{i} x^{(k)}_j$ where $x$ is a stored pattern and $N$ is the total number of stored pattern. It is symmetric ($w_{ij} = w_{ji}$) and there are no self connections ($w_{ii} = 0$).</li>
 			<li>The network is synchronously updated, with the result of one update being presented as the output.</li>
-			<li>The energy of the network is defined by $E = -\frac{1}{2} \sum_{ij} w_{ij} c_{i} c_{j}$ where $c$ is the current state of the network.</li>
+			<li>The energy of the network is defined by $E = -\frac{1}{2} \sum_{ij} w_{ij} c_{i} c_{j}$ where $c$ is the current displayed pattern of the network.</li>
 		</ul>
 		<div>
 			<h3>Observations</h3>
 			<ul>
-				<li>Storing the same pattern again will lower that pattern's energy.</li>
+				<li>Storing the same pattern more than once will lower that pattern's energy.</li>
 				<li>Too many similar patterns being stored may result in some superposition of the patterns being retrieved (a 'mixture state').</li>
 				<li>Oscillatory behaviour can be observed.</li>
 				<li>The 'inverse' pattern has the same energy as the real pattern.</li>
 			</ul>
 		</div>
 
+		<h2>Hopfield network simulation</h2>
 		<div id='network'>
 		</div>
 
@@ -41,21 +42,29 @@
 
 		<script type='text/template' id='hopfield_tmpl'>
 			<div class='main'>
-				<button id='clear'>Clear</button>
-				<button id='invert'>Invert</button>
+				<p>
+				<span title="a measure of how 'stable' the pattern is"><b>Energy</b></span>: <span class='energy'>0</span>
+				</p>
 				<div id='grid_holder'>
 				</div>
-				<p>
-					Energy: <span class='energy'>0</span>
-				</p>
-				<button id='train'>Train</button>
-				<button id='recall'>Recall</button>
+				<button title='clear current pattern' id='clear'>Clear</button>
+				<button title='generate a random pattern' id='random'>Random</button>
+				<button title='invert the pattern' id='invert'>Invert</button>
+				<br/>
+				<button title='train the network with this pattern' id='train'>Train</button>
+				<button title='present this pattern to the network to recall' id='recall'>Recall</button>
+				<br/>
+				Width: 
+				<input type='number' min='1' value='5'>
+				<br/>
+				Height: 
+				<input type='number' min='1' value='5'>
 			</div>
 		</script>
 
 		<script type="text/template" id='stored_tmpl'>
 			<div id="memories">
-				<h3>Memories</h3>
+				<h3>Stored patterns</h3>
 				<div class="xscroller">
 				</div>
 			</div>
@@ -77,10 +86,10 @@
 
 		<script type="text/template" id='mem_tmpl'>
 			<div class = "mem">
-				<div class="grid_holder"></div>
 				<p>
-					Energy: <span class='energy'>0</span>
+				<span title="a measure of how 'stable' the pattern is"><b>Energy</b></span>: <span class='energy'>0</span>
 				</p>
+				<div class="grid_holder"></div>
 				<button class='forget'>Forget</button>
 			</div>
 			</div>
